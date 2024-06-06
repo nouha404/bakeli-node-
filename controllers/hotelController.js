@@ -1,7 +1,7 @@
 const Hotel = require('../models/Hotel');
 
 
-const getAllHotels = async (req, res) => {
+exports.getAllHotels = async (req, res) => {
     try {
         const hotels = await Hotel.find();
         res.json(hotels);
@@ -11,15 +11,39 @@ const getAllHotels = async (req, res) => {
 };
 
 
+exports.getHotelById = async (req, res) => {
+    try {
+        const hotel = await Hotel.findById(req.params.id);
+        if (hotel == null) {
+            return res.status(404).json({ message: 'Hotel non trouvé' });
+        }
+        res.json(hotel);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
-const createHotel = async (req, res) => {
+/*exports.createUser = async (req, res) => {
+    const user = new User({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password
+    });
+
+    try {
+        const newUser = await user.save();
+        res.status(201).json(newUser);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};*/
+exports.createHotel = async (req, res) => {
     const hotel = new Hotel({
         name: req.body.name,
         address: req.body.address,
         email: req.body.email,
         telephone: req.body.telephone,
-        pricePerNight: req.body.pricePerNight,
-        imageUrl: req.body.imageUrl
+        pricePerNight: req.body.pricePerNight
     });
 
     try {
@@ -30,7 +54,9 @@ const createHotel = async (req, res) => {
     }
 };
 
-const updateHotel = async (req, res) => {
+
+
+exports.updateHotel = async (req, res) => {
     try {
         const hotel = await Hotel.findById(req.params.id);
         if (hotel == null) {
@@ -63,18 +89,35 @@ const updateHotel = async (req, res) => {
     }
 };
 
-const deleteHotel = async (req, res) => {
+exports.deleteHotelTwo = async (req, res) => {
     try {
-        const hotel = await Hotel.findById(req.params.id);
-        if (hotel == null) {
+        const hotel = await Hotel.findByIdAndDelete(req.params.id);
+        if (!Hotel) {
             return res.status(404).json({ message: 'Hôtel non trouvé' });
         }
-        await hotel.remove();
         res.json({ message: 'Hôtel supprimé' });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
+exports.patchHotel = async (req, res) => {
+    try {
+        const hotel = await Hotel.findById(req.params.id);
+        if (hotel == null) {
+            return res.status(404).json({ message: 'Hôtel non trouvé' });
+        }
 
-module.exports={deleteHotel,updateHotel,getAllHotels,createHotel}
+        // Mettre à jour les attributs fournis dans le corps de la requête
+        for (const key in req.body) {
+            if (req.body.hasOwnProperty(key)) {
+                hotel[key] = req.body[key];
+            }
+        }
+
+        const updatedHotel = await hotel.save();
+        res.json(updatedHotel);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};

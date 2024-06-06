@@ -1,6 +1,6 @@
-//const DATABASE = require('../database/produits.json');
 const User = require('../models/User');
-
+const Hotel = require("../models/Hotel");
+const bcrypt = require("bcryptjs")
 
 exports.getAllUsers = async (req, res) => {
     try {
@@ -11,7 +11,7 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-const registerUser = async (req, res) => {
+/*const registerUser = async (req, res) => {
     try {
         const { fullName, email, password } = await req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,11 +23,21 @@ const registerUser = async (req, res) => {
         console.error("Error registering user:", error);
         res.status(500).json({ message: "An error occurred while registering the user." });
     }
-};
+};*/
 
 
 exports.createUser = async (req, res) => {
-    const user = new User({
+    const { username, email, password } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10); // Hachage du mot de passe
+        const newUser = new User({ username, email, password: hashedPassword }); // Utilisation du mot de passe haché
+        const savedUser = await newUser.save();
+        res.status(201).json(savedUser);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+
+    /*const user = new User({
         username: req.body.username,
         email: req.body.email,
         password: req.body.password
@@ -38,7 +48,7 @@ exports.createUser = async (req, res) => {
         res.status(201).json(newUser);
     } catch (err) {
         res.status(400).json({ message: err.message });
-    }
+    }*/
 };
 
 exports.getUserById = async (req, res) => {
@@ -53,34 +63,30 @@ exports.getUserById = async (req, res) => {
     }
 };
 
-exports.updateUser = async (req, res) => {
+
+exports.patchUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (user == null) {
-            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+            return res.status(404).json({ message: 'Hôtel non trouvé' });
         }
 
-        if (req.body.name != null) {
-            user.name = req.body.name;
-        }
-        if (req.body.email != null) {
-            user.email = req.body.email;
-        }
-        if (req.body.password != null) {
-            user.password = req.body.password;
+        for (const key in req.body) {
+            if (req.body.hasOwnProperty(key)) {
+                user[key] = req.body[key];
+            }
         }
 
-        const updatedUser = await user.save();
-        res.json(updatedUser);
+        const updatedHotel = await user.save();
+        res.json(updatedHotel);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
 };
 
-
 exports.deleteUserTwo = async (req, res) => {
     try {
-        const hotel = await User.findByIdAndDelete(req.params.id);
+        const user = await User.findByIdAndDelete(req.params.id);
 
         if (!User) {
             return res.status(404).json({ message: "USer not found" });
@@ -91,4 +97,6 @@ exports.deleteUserTwo = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 
