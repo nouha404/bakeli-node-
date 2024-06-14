@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const hotelSchema = new mongoose.Schema({
+    /*user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },*/
     name: {
         type: String,
         required: true
@@ -26,8 +31,8 @@ const hotelSchema = new mongoose.Schema({
         required: true
     },
     imageUrl: {
-        type: String,
-    }
+        type: Buffer,
+    },
 });
 
 const Hotel = mongoose.model('Hotel', hotelSchema);

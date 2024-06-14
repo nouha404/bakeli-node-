@@ -4,19 +4,20 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv=require('dotenv');
 
-dotenv.config({path:'./.env'});
+
 
 const app = express();
 const port = 3007;
+dotenv.config({path:'./.env'});
 
 const userRoutes = require('./routes/users');
+
 const hotelRoutes = require('./routes/hotel');
 const authRoutes = require("./routes/authRoutes")
 const { requireAuth } = require('./middleware/authMiddleware');
 
-// Middleware
-app.use(bodyParser.json());
-app.use(cors());
+
+
 
 // Connexion à la base de données MongoDB
 mongoose.connect(process.env.DATABASE_URL, {
@@ -28,15 +29,11 @@ mongoose.connect(process.env.DATABASE_URL, {
     console.error('MongoDB connection error:', err);
 });
 
-//requireAuth
-
+app.use(cors());
+app.use(bodyParser.json());
 app.use('/api/users',userRoutes);
 app.use('/api/hotels',hotelRoutes);
-
 app.use('/api',authRoutes);
-app.use('/api', requireAuth, (req, res) => {
-    res.status(200).json({ message: 'Protected route accessed' });
-});
 
 
 // Lancer le serveur
